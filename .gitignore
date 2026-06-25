@@ -1,0 +1,6 @@
+*.elf
+*.o
+*.a
+*.sym
+shot.png
+build/
