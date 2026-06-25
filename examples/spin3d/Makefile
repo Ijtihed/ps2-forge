@@ -10,6 +10,8 @@ run: $(EE_BIN)
 	Play --elf $(EE_BIN)
 shot: $(EE_BIN)
 	bash ../../tools/shot.sh $(EE_BIN) $(SECS) shot.png
+test: $(EE_BIN)
+	bash ../../tools/shot.sh $(EE_BIN) $(SECS) shot.png
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS)
 include $(PS2SDK)/samples/Makefile.pref

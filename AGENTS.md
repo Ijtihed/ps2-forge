@@ -83,15 +83,31 @@ Config: `Config{ u8 clear_r, clear_g, clear_b; }`, get a default with `config_de
 - Assets: bake images/audio into C arrays (a `pack.py` that emits `assets.h`); the
   ELF boots with no filesystem, so embed everything.
 
+## Toolchain (one-time)
+
+```sh
+tools/bootstrap.sh          # downloads the prebuilt ps2dev toolchain (no sudo)
+# then export the PS2DEV / PS2SDK / GSKIT + PATH it prints
+```
+
 ## Build
 
-Needs the ps2dev toolchain (ee-gcc + ps2sdk + gsKit). With env set:
+With the env set (above):
 ```sh
-export PS2DEV=/path/to/ps2dev PS2SDK=$PS2DEV/ps2sdk GSKIT=$PS2DEV/gsKit
-export PATH=$PS2DEV/ee/bin:$PS2DEV/bin:$PS2SDK/bin:$PATH
 make            # produces <name>.elf
 ```
 The Makefile links: `-lgskit_toolkit -lgskit -ldmakit -laudsrv -lpad -lm -lc`.
+
+## Test loop (the agentic part)
+
+```sh
+make test       # build -> boot headless -> prints "RENDER: PASS|FAIL" + exit code
+```
+`make test` boots the ELF in Play! under Xvfb, screenshots it, and checks the
+game area actually drew varied, non-black pixels. So the loop is **edit -> one
+command -> verdict** (no eyeballing). `make shot` does the same but just leaves
+`shot.png` for you to read. Deps for these: Play! in PATH, Xvfb, mesa/llvmpipe,
+python3 + mss + Pillow.
 
 ## Run
 
