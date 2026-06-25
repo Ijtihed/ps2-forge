@@ -44,6 +44,22 @@ e3d_end(c);
 - **A built-in test loop.** `make shot` builds the ELF, boots it headless, and
   screenshots it, so an agent iterates build → look → fix in one command.
 
+## Porting a JS/TS game
+
+Most agent-made games are HTML5-canvas or p5.js. Porting one to the PS2 is
+mostly mechanical, same loop, same draw calls, different names. Include
+[`engine/canvas.h`](engine/canvas.h) and the calls line up near 1:1:
+
+```c
+cv_fill(90,200,255); cv_rect(x,y,8,8);   // ctx.fillStyle + ctx.fillRect
+cv_text(8,8,"SCORE");                     // ctx.fillText
+if (cv_key(BTN_LEFT)) x--;                // keyIsDown(LEFT_ARROW)
+```
+
+See [`PORTING.md`](PORTING.md) for the full mapping table + a worked example,
+[`examples/jsport`](examples/jsport) for a ported bouncing-ball game, and the
+`port-js-to-ps2` skill to have an agent do it.
+
 ## What's in the engine
 
 2D: rects, an alpha-tested font atlas (`e_text`), rotated quads, textured

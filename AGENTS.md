@@ -74,6 +74,15 @@ Audio (optional; SFX = embedded ADPCM):
 
 Config: `Config{ u8 clear_r, clear_g, clear_b; }`, get a default with `config_default()`.
 
+## Porting a JS/TS game
+
+If you're bringing over an HTML5-canvas or p5.js game: include `engine/canvas.h`
+for `cv_*` sugar (`cv_fill`/`cv_rect`/`cv_text`/`cv_circle`/`cv_key`/`cv_image`)
+that maps near 1:1 to canvas calls. Split the `requestAnimationFrame` loop into
+`update`+`render` (call `cv_begin(c)` at the top of each), scale coords to
+320x240, embed assets as C arrays. Full table + worked example in `PORTING.md`;
+the `port-js-to-ps2` skill automates it.
+
 ## Conventions for agents
 
 - All gameplay math in the 320x240 virtual space. Keep it integer where you can.

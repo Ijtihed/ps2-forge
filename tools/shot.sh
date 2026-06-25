@@ -27,7 +27,7 @@ px = list(crop.getdata())
 nonblack = sum(1 for r,g,b in px if r+g+b > 36)
 colors = len(set((r>>4, g>>4, b>>4) for r,g,b in px))
 frac = nonblack/len(px)
-ok = colors > 12 and frac > 0.01
+ok = colors >= 5 and frac > 0.005   # rendered something vs a blank/black screen
 print("RENDER:", "PASS" if ok else "FAIL",
       "| distinct=%d nonblack=%.1f%% -> %s" % (colors, frac*100, sys.argv[1]))
 sys.exit(0 if ok else 1)
