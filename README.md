@@ -1,6 +1,6 @@
 # ps2-forge
 
-**Build PlayStation 2 games in one C file.** Tiny, readable C — one header,
+**Build PlayStation 2 games in one C file.** Tiny, readable C. One header,
 ~30 functions, **2D and 3D**. The entire engine fits on a single page
 ([`AGENTS.md`](AGENTS.md)), so an AI agent (or you) can write, build, and run a
 real PS2 game from one read. Builds with the open `ps2dev` toolchain; runs in the
@@ -8,7 +8,7 @@ real PS2 game from one read. Builds with the open `ps2dev` toolchain; runs in th
 
 <p align="center">
   <img src="screenshots/voxel3d.gif" width="440"><br>
-  <em>a 60fps 3D cellular automaton — running on a PlayStation 2</em>
+  <em>a 60fps 3D cellular automaton, running on a PlayStation 2</em>
 </p>
 
 ### Made with ps2-forge
@@ -92,10 +92,10 @@ Examples: [`examples/template`](examples/template) (2D),
 
 ## What's in the engine
 
-**2D** — filled rects, an alpha-tested font atlas (`e_text`), rotated quads,
+**2D:** filled rects, an alpha-tested font atlas (`e_text`), rotated quads,
 textured sprites, a dynamic framebuffer blit (`e_image_draw`, for cellular
 automata / software renderers), and a hardware scissor.
-**3D** — a software voxel renderer (`e3d_*`), depth-sorted, one blit, 60fps.
+**3D:** a software voxel renderer (`e3d_*`), depth-sorted, one blit, 60fps.
 Plus D-pad/button input and ADPCM sound effects.
 
 Full API + conventions on one page: **[`AGENTS.md`](AGENTS.md)**.
@@ -103,11 +103,11 @@ Full API + conventions on one page: **[`AGENTS.md`](AGENTS.md)**.
 ## Why "agentic-first"
 
 - **One contract.** [`AGENTS.md`](AGENTS.md) is the complete API, build, run, and
-  conventions — an agent reads it, copies `examples/template`, and emits a game.
+  conventions. An agent reads it, copies `examples/template`, and emits a game.
 - **A skill.** [`skills/make-ps2-game`](skills/make-ps2-game/SKILL.md) scaffolds,
   builds, and verifies a game.
 - **A built-in verdict loop.** `make test` builds the ELF, boots it headless, and
-  prints `RENDER: PASS/FAIL` — so the loop is **edit → one command → verdict**,
+  prints `RENDER: PASS/FAIL`, so the loop is **edit, one command, verdict**,
   no eyeballing.
 
 ## Porting a JS/TS game
@@ -126,11 +126,11 @@ Full mapping table + a worked example: [`PORTING.md`](PORTING.md) and the
 
 ## Built with it
 
-[emergent-systems-ps2](https://github.com/Ijtihed/emergent-systems-ps2) — sixteen
+[emergent-systems-ps2](https://github.com/Ijtihed/emergent-systems-ps2): sixteen
 cellular automata / emergent systems (the GIFs above), including a 60fps 3D one,
 running on real PS2 hardware.
 
 ## License
 
 Engine code: MIT. Built on [PS2SDK](https://github.com/ps2dev/ps2sdk) and
-[gsKit](https://github.com/ps2dev/gsKit) (ps2dev) — their licenses apply to them.
+[gsKit](https://github.com/ps2dev/gsKit) (ps2dev): their licenses apply to them.
