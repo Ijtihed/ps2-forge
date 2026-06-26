@@ -5,3 +5,17 @@
 shot.png
 build/
 /*.png
+
+# personal video assets + their builders (not part of the engine)
+/*.mp4
+/*.gif
+/VIDEO.md
+/tools/make_video.py
+/tools/make_video2.py
+/tools/make_tiktok.py
+/tools/make_audio.py
+/tools/build_clips.py
+/tools/build_edit.py
+/tools/build_final.py
+/tools/music_gen.py
+/tools/record_gif.py
