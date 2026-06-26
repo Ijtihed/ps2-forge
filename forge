@@ -19,7 +19,8 @@ c_g(){ printf '\033[32m%s\033[0m\n' "$*"; }
 c_r(){ printf '\033[31m%s\033[0m\n' "$*"; }
 c_y(){ printf '\033[33m%s\033[0m\n' "$*"; }
 
-usage(){ sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+# print the contiguous leading comment block (after the shebang) as help
+usage(){ awk 'NR>1{ if(/^#/){sub(/^# ?/,"");print} else exit }' "${BASH_SOURCE[0]}"; }
 
 have(){ command -v "$1" >/dev/null 2>&1; }
 
@@ -76,10 +77,9 @@ cmd="${1:-help}"; shift || true
 case "$cmd" in
     doctor) doctor ;;
     new)    new "${1:-}" ;;
-    build)  make ;;
-    run)    make run ;;
-    test)   make test ;;
-    shot)   make shot ;;
+    build|run|test|shot)
+            [ -f Makefile ] || { c_r "no Makefile here. run inside a game folder (see 'forge new'), or 'forge play <example>'"; exit 1; }
+            make "$([ "$cmd" = build ] && echo all || echo "$cmd")" ;;
     list)   echo "examples:"; ls "$FORGE_ROOT/examples" ;;
     play)   ex="${1:-}"; [ -d "$FORGE_ROOT/examples/$ex" ] || { c_r "no example '$ex' (try: forge list)"; exit 1; }
             ( cd "$FORGE_ROOT/examples/$ex" && make && make run ) ;;

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # forge gui - a tiny local web dashboard to browse + preview ps2-forge games.
 # Lists the examples, and on click it builds one, boots it headless, and shows
-# the actual rendered frame + a PASS/FAIL verdict. Serves on :8082.
+# the actual rendered frame + a PASS/FAIL verdict. Serves on :8090 (localhost).
 #
-#   python3 tools/gui.py            # then open http://localhost:8082
+#   python3 tools/gui.py            # then open http://localhost:8090
 # (needs: ps2dev env on PATH, Play!/AppRun, Xvfb, python with mss + Pillow)
 import os, sys, json, glob, time, subprocess, threading, shutil
+from urllib.parse import urlparse, parse_qs
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import mss
 from PIL import Image
@@ -30,8 +31,8 @@ def build_and_capture(ex):
         return {"ok": False, "stage": "build", "log": (b.stderr or b.stdout)[-1500:]}
     elf = elfs[0]
     env = dict(os.environ, DISPLAY=":99")
-    subprocess.run("pkill -f 'Xvfb :99'; pkill -f usr/bin/Play; pkill -f AppRun; sleep 1",
-                   shell=True, env=env)
+    # display-scoped only; anything on :99 dies with its Xvfb (don't pkill broad AppRun)
+    subprocess.run("pkill -f 'Xvfb :99' 2>/dev/null; sleep 1", shell=True, env=env)
     xv = subprocess.Popen(["Xvfb", ":99", "-screen", "0", "1280x720x24", "-nolisten", "tcp"],
                           env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(2)
@@ -51,7 +52,10 @@ def build_and_capture(ex):
         return {"ok": True, "verdict": verdict, "distinct": cols,
                 "nonblack": round(frac * 100, 1), "img": "/img/%s.png?%d" % (ex, int(time.time()))}
     finally:
-        pl.terminate(); xv.terminate()
+        for proc in (pl, xv):
+            proc.terminate()
+            try: proc.wait(timeout=3)
+            except Exception: proc.kill()
 
 PAGE = """<!doctype html><html><head><meta charset=utf-8><title>ps2-forge</title>
 <style>
@@ -105,14 +109,17 @@ class H(BaseHTTPRequestHandler):
             return self._send(200, "text/html; charset=utf-8", html.encode())
         if p.startswith("/screenshots/"):
             f = os.path.join(ROOT, "screenshots", os.path.basename(p))
-            if os.path.exists(f): return self._send(200, "image/gif", open(f, "rb").read())
+            if os.path.exists(f):
+                with open(f, "rb") as fh: return self._send(200, "image/gif", fh.read())
         if p.startswith("/img/"):
             f = os.path.join(PREVIEW_DIR, os.path.basename(p))
-            if os.path.exists(f): return self._send(200, "image/png", open(f, "rb").read())
+            if os.path.exists(f):
+                with open(f, "rb") as fh: return self._send(200, "image/png", fh.read())
         self._send(404, "text/plain", b"not found")
     def do_POST(self):
-        if self.path.startswith("/preview"):
-            ex = self.path.split("ex=")[-1]
+        u = urlparse(self.path)
+        if u.path == "/preview":
+            ex = (parse_qs(u.query).get("ex") or [""])[0]
             if ex not in examples(): return self._send(400, "application/json", b'{"ok":false}')
             with LOCK:
                 res = build_and_capture(ex)
@@ -121,4 +128,5 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     print("ps2-forge gui  ->  http://localhost:%d   (emulator: %s)" % (PORT, PLAY))
-    ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()
+    # bind localhost only; reach a remote box via: ssh -L PORT:localhost:PORT <host>
+    ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()

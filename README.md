@@ -1,5 +1,7 @@
 # ps2-forge
 
+[![build](https://github.com/Ijtihed/ps2-forge/actions/workflows/build.yml/badge.svg)](https://github.com/Ijtihed/ps2-forge/actions/workflows/build.yml)
+
 **Build PlayStation 2 games in one C file.** Tiny, readable C. One header,
 ~20 core functions, **2D and 3D**. The entire engine fits on a single page
 ([`AGENTS.md`](AGENTS.md)), so an AI agent (or you) can write, build, and run a
@@ -152,6 +154,12 @@ Full mapping table + a worked example: [`PORTING.md`](PORTING.md) and the
 [emergent-systems-ps2](https://github.com/Ijtihed/emergent-systems-ps2): sixteen
 cellular automata / emergent systems (the GIFs above), including a 60fps 3D one,
 running on real PS2 hardware.
+
+## Contributing
+
+PRs welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the build setup, the
+one-file-game convention, the `make test` verdict, and code style (notably: no em
+dashes). CI builds every example on each push.
 
 ## License
 

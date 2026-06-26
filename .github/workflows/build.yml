@@ -1,0 +1,61 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Compile every bundled example against the engine using the official ps2dev
+# toolchain image (ships ee-gcc + ps2sdk + gsKit). This is the merge gate: if a
+# change breaks any example's build, CI fails.
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    container: ps2dev/ps2dev:latest
+    steps:
+      - name: Install git + make (Alpine image)
+        run: apk add --no-cache git make
+
+      - uses: actions/checkout@v4
+
+      - name: Resolve toolchain env
+        run: |
+          : "${PS2DEV:=/usr/local/ps2dev}"
+          : "${PS2SDK:=$PS2DEV/ps2sdk}"
+          if [ -z "${GSKIT:-}" ]; then
+            for c in "$PS2DEV/gsKit" "$PS2SDK/ports/gsKit" "$PS2SDK/ports"; do
+              [ -d "$c" ] && GSKIT="$c" && break
+            done
+          fi
+          {
+            echo "PS2DEV=$PS2DEV"
+            echo "PS2SDK=$PS2SDK"
+            echo "GSKIT=$GSKIT"
+            echo "PATH=$PS2DEV/ee/bin:$PS2DEV/bin:$PS2SDK/bin:$PATH"
+          } >> "$GITHUB_ENV"
+          echo "PS2DEV=$PS2DEV  PS2SDK=$PS2SDK  GSKIT=$GSKIT"
+          command -v mips64r5900el-ps2-elf-gcc
+
+      - name: Build every example
+        run: |
+          set -e
+          fail=0
+          for d in examples/*/; do
+            echo "::group::build $d"
+            make -C "$d" clean >/dev/null 2>&1 || true
+            if make -C "$d"; then
+              echo "OK   $d -> $(ls "$d"*.elf 2>/dev/null | xargs -n1 basename | tr '\n' ' ')"
+            else
+              echo "FAIL $d"; fail=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $fail
+
+      - name: Verify the build left no tracked artifacts
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
+          # *.elf / *.o are gitignored; this catches an accidental commit of one.
+          test -z "$(git status --porcelain | grep -E '\.(elf|o|a)$')" || {
+            echo "build produced tracked artifacts:"; git status --porcelain; exit 1; }
