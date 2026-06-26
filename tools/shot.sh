@@ -7,17 +7,25 @@
 # Exit 0 if the game rendered something, 1 if it stayed blank / failed to boot.
 set -u
 ELF="$1"; WAIT="${2:-3}"; OUT="${3:-/tmp/ps2shot.png}"
+# Emulator command. Override with $PLAY. Defaults to `Play` on PATH, else a
+# common Play! AppImage location.
+PLAY="${PLAY:-$(command -v Play 2>/dev/null || echo "$HOME/toolchains/squashfs-root/AppRun")}"
 export DISPLAY=:99
-pkill -f "Xvfb :99" 2>/dev/null; pkill -f "usr/bin/Play" 2>/dev/null; sleep 1
+pkill -f "Xvfb :99" 2>/dev/null; pkill -f "usr/bin/Play" 2>/dev/null; pkill -f AppRun 2>/dev/null; sleep 1
 Xvfb :99 -screen 0 1280x720x24 -nolisten tcp >/dev/null 2>&1 & XP=$!
 sleep 2
-LIBGL_ALWAYS_SOFTWARE=1 Play --elf "$ELF" >/dev/null 2>&1 & PP=$!
+LIBGL_ALWAYS_SOFTWARE=1 "$PLAY" --elf "$ELF" >/dev/null 2>&1 & PP=$!
 sleep "$WAIT"
 python3 - "$OUT" <<'PY'
 import sys, mss
 from PIL import Image
 with mss.mss() as s:
-    im = s.grab(s.monitors[1])
+    # Grab an explicit screen region. mss's per-monitor grab (monitors[1]/[0])
+    # can return black under a bare Xvfb; an explicit left/top/width/height box
+    # reads the real framebuffer reliably.
+    m = s.monitors[1]
+    box = {"left": m["left"], "top": m["top"], "width": m["width"], "height": m["height"]}
+    im = s.grab(box)
     img = Image.frombytes("RGB", im.size, im.bgra, "raw", "BGRX")
 img.save(sys.argv[1])
 # verdict: look at the central game area; did it draw varied, non-black pixels?

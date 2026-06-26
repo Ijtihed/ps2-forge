@@ -1,7 +1,8 @@
-# ps2-forge — agent guide
+# ps2-forge - agent guide
 
-A tiny, agentic-first **PlayStation 2 game engine** in C. One header, ~25
-functions. This file is the full contract: read it and you can author, build,
+A tiny, agentic-first **PlayStation 2 game engine** in C. One header, ~20
+core functions (plus a canvas-style sugar layer). This file is the full
+contract: read it and you can author, build,
 and run a PS2 game without reading the engine source.
 
 ## Mental model
@@ -32,21 +33,21 @@ scales it to the GS framebuffer. Loop runs at the console's vsync (~60Hz NTSC).
 ## API (everything you can call)
 
 Drawing (call only from `render`):
-- `e_rect(c, x,y,w,h, r,g,b)` — filled rectangle (0-255 colour).
-- `e_text(c, x,y, r,g,b, "STR")` — bitmap text (A-Z 0-9 . - ! ? : *). Uppercased.
-- `e_quad(c, x0,y0, x1,y1, x2,y2, x3,y3, r,g,b)` — filled quad (rotated shapes/beams).
+- `e_rect(c, x,y,w,h, r,g,b)` - filled rectangle (0-255 colour).
+- `e_text(c, x,y, r,g,b, "STR")` - bitmap text (A-Z 0-9 . - ! ? : *). Uppercased.
+- `e_quad(c, x0,y0, x1,y1, x2,y2, x3,y3, r,g,b)` - filled quad (rotated shapes/beams).
 - `Sprite` + `e_sprite_init(&spr, rgba, w,h)` then `e_sprite_draw(c,&spr, x,y,w,h)`
-  — textured sprite from a CT32 RGBA buffer (transparent texels should be black).
-- `e_sprite_draw_tinted(c,&spr, x,y,w,h, r,g,b)` — modulate a white sprite to a colour.
-- `Image` + `e_image_draw(c,&img, rgba, iw,ih, dx,dy,dw,dh)` — blit a w*h RGBA
+  - textured sprite from a CT32 RGBA buffer (transparent texels should be black).
+- `e_sprite_draw_tinted(c,&spr, x,y,w,h, r,g,b)` - modulate a white sprite to a colour.
+- `Image` + `e_image_draw(c,&img, rgba, iw,ih, dx,dy,dw,dh)` - blit a w*h RGBA
   buffer scaled to a rect, re-uploaded each frame. Use for grids / framebuffers
   (cellular automata, software renderers). Buffer must be 16-byte aligned.
-- `e_scissor(c, x,y,w,h)` / `e_scissor_off(c)` — hardware clip rectangle.
+- `e_scissor(c, x,y,w,h)` / `e_scissor_off(c)` - hardware clip rectangle.
 
 3D (built-in software voxel renderer; coords centered on origin, ~-16..+16):
-- `e3d_begin(c, yaw, pitch)` — clear the 3D buffer, set the rotation.
-- `e3d_voxel(x,y,z, r,g,b)` — queue a depth-shaded voxel (call many times).
-- `e3d_end(c)` — depth-sort + blit fullscreen (one draw). Then draw 2D HUD on top.
+- `e3d_begin(c, yaw, pitch)` - clear the 3D buffer, set the rotation.
+- `e3d_voxel(x,y,z, r,g,b)` - queue a depth-shaded voxel (call many times).
+- `e3d_end(c)` - depth-sort + blit fullscreen (one draw). Then draw 2D HUD on top.
   Example (a spinning cube of points):
   ```c
   static float yaw;
@@ -62,14 +63,14 @@ Drawing (call only from `render`):
   ```
 
 Input (call from `update`; edge-detected helpers compare to last frame):
-- `ctx_is_held(c, BTN_x)` — held this frame.
+- `ctx_is_held(c, BTN_x)` - held this frame.
 - `ctx_just_pressed(c, BTN_x)` / `ctx_just_released(c, BTN_x)`.
 - Buttons: `BTN_UP BTN_DOWN BTN_LEFT BTN_RIGHT BTN_CROSS BTN_CIRCLE BTN_SQUARE
   BTN_TRIANGLE BTN_START BTN_SELECT BTN_L1 BTN_R1 BTN_L2 BTN_R2 BTN_L3 BTN_R3`.
-- `c->frame` — frame counter (uint).
+- `c->frame` - frame counter (uint).
 
 Audio (optional; SFX = embedded ADPCM):
-- `e_audio_init(audsrv_irx, irx_size)` — once in `init` (needs an embedded audsrv.irx).
+- `e_audio_init(audsrv_irx, irx_size)` - once in `init` (needs an embedded audsrv.irx).
 - `int h = e_sfx_load(adpcm_bytes, size)` ; `e_sfx_play(h)`.
 
 Config: `Config{ u8 clear_r, clear_g, clear_b; }`, get a default with `config_default()`.
@@ -114,13 +115,14 @@ make test       # build -> boot headless -> prints "RENDER: PASS|FAIL" + exit co
 ```
 `make test` boots the ELF in Play! under Xvfb, screenshots it, and checks the
 game area actually drew varied, non-black pixels. So the loop is **edit -> one
-command -> verdict** (no eyeballing). `make shot` does the same but just leaves
-`shot.png` for you to read. Deps for these: Play! in PATH, Xvfb, mesa/llvmpipe,
+command -> verdict** (no eyeballing). `make shot` runs the identical check and
+also writes `shot.png`; use whichever target name reads better to you. Deps for
+these: Play! in PATH, Xvfb, mesa/llvmpipe,
 python3 + mss + Pillow.
 
 ## Run
 
-- **Emulator (no BIOS):** Play! — `Play --elf game.elf`. Bind keys in its
+- **Emulator (no BIOS):** Play! - `Play --elf game.elf`. Bind keys in its
   controller config (arrows + a key for Cross). Headless capture: run under
   Xvfb + software GL and screenshot.
 - **Real PS2:** copy the `.elf` to USB / memory card, launch via FMCB / wLaunchELF.

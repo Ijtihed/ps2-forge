@@ -1,7 +1,7 @@
 # ps2-forge
 
 **Build PlayStation 2 games in one C file.** Tiny, readable C. One header,
-~30 functions, **2D and 3D**. The entire engine fits on a single page
+~20 core functions, **2D and 3D**. The entire engine fits on a single page
 ([`AGENTS.md`](AGENTS.md)), so an AI agent (or you) can write, build, and run a
 real PS2 game from one read. Builds with the open `ps2dev` toolchain; runs in the
 **Play!** emulator (no BIOS needed) and on **real PS2 hardware**.
@@ -71,7 +71,7 @@ Export the `PS2DEV` / `PS2SDK` / `GSKIT` + `PATH` lines it prints.
 ```sh
 cp -r examples/template mygame
 cd mygame
-# edit game.c  (and set EE_BIN in the Makefile to your game's name)
+# edit game.c   (optional: rename the output .elf via EE_BIN in the Makefile)
 ```
 
 **3. Build, run, test:**
@@ -86,7 +86,30 @@ it on a PlayStation 2 via FMCB or wLaunchELF.
 
 Examples: [`examples/template`](examples/template) (2D),
 [`examples/spin3d`](examples/spin3d) (3D),
+[`examples/life`](examples/life) (Game of Life, the `e_image_draw` grid pattern),
 [`examples/jsport`](examples/jsport) (a ported JS game).
+
+---
+
+## The `forge` command (and a preview GUI)
+
+Don't want to think about `make`? Use the bundled `forge` CLI:
+
+```sh
+./forge doctor          # check your toolchain is ready
+./forge new mygame      # scaffold a new game in ./mygame
+./forge build           # compile the game in this folder -> .elf
+./forge run             # build + boot it in the emulator
+./forge test            # build + boot headless + print RENDER: PASS/FAIL
+./forge play spin3d     # build + run a bundled example
+./forge gui             # open a web dashboard to browse + preview games
+```
+
+`forge gui` serves a local dashboard (http://localhost:8090) that lists every
+example and, on click, **builds it, boots it headless, and shows the actual
+rendered PS2 frame** plus a PASS/FAIL verdict. The fastest way to see what the
+engine does. (The headless preview/test needs `Play!`, `Xvfb`, and a Python with
+`mss` + `Pillow`; on a remote box, tunnel the port: `ssh -L 8090:localhost:8090 <host>`.)
 
 ---
 

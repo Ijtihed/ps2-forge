@@ -1,20 +1,14 @@
 /*
- * engine.h -- a tiny PS2 runtime engine that mirrors PSoXide's
- * `psx-engine` Scene/App framework, re-expressed in C + PS2SDK/gsKit.
+ * engine.h -- a tiny PlayStation 2 runtime engine in C.
  *
- * PSoXide (PS1) shape we are copying:
- *   - App::run(Config, &mut Scene) drives the cadence:
- *       poll-pad -> update -> clear -> render -> draw-sync -> vsync -> swap
- *   - trait Scene { init(&mut Ctx); update(&mut Ctx); render(&mut Ctx); }
- *   - Ctx::is_held / just_pressed / just_released for edge-detected input
- *   - 2D draw of solid rects + text, ordered back-to-front
+ * A game fills a Scene (init / update / render) and calls app_run(); the
+ * engine owns the loop, cadence, and hardware:
+ *   poll-pad -> update -> clear -> render -> draw-sync -> vsync -> swap
+ * Input is edge-detected (is_held / just_pressed / just_released).
  *
- * PS1 -> PS2 reality: none of PSoXide's GPU/OT/GTE code transfers (different
- * silicon). The *interface* transfers. Under the hood this is gsKit on the
- * GS, libpad on the IOP, and the EE main loop -- "how PS2 does things".
- *
- * The game is authored in a virtual 320x240 space (same as the PSoXide pong)
- * and scaled to the GS framebuffer, so the ported game logic is unchanged.
+ * Under the hood: gsKit on the Graphics Synthesizer, libpad on the IOP, and
+ * the EE main loop. Games are authored in a virtual 320x240 space and scaled
+ * to the GS framebuffer. Full API + usage on one page: see AGENTS.md.
  */
 #ifndef PS2ENGINE_H
 #define PS2ENGINE_H
