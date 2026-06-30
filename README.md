@@ -1,4 +1,4 @@
-# ps2-forge
+# [ps2-forge](https://ps2-forge.vercel.app)
 
 [![build](https://github.com/Ijtihed/ps2-forge/actions/workflows/build.yml/badge.svg)](https://github.com/Ijtihed/ps2-forge/actions/workflows/build.yml)
 
